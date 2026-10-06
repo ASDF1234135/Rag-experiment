@@ -1,0 +1,566 @@
+<title>RAG Search-Flow Comparison</title>
+<style>
+/* Layout: one reading column on a quiet plane; tabs choose dataset x corpus setting, charts and tables follow the choice.
+   Color: neutral warm greys, one blue accent for interaction; series colors are the validated 7-slot categorical order (G1..G7).
+   Type: system sans with CJK fallbacks; tabular figures only in table columns. */
+:root {
+  color-scheme: light;
+  --plane: #f9f9f7; --surface: #fcfcfb; --ink: #0b0b0b; --ink2: #52514e; --muted: #898781;
+  --grid: #e1e0d9; --axis: #c3c2b7; --border: rgba(11,11,11,.10); --accent: #256abf; --accent-wash: rgba(37,106,191,.10);
+  --tone-a: #b4b3ab; --tone-b: #77766f; --tone-c: #256abf;
+  --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; --s4: #eda100; --s5: #e87ba4; --s6: #008300; --s7: #4a3aa7; --s8: #e34948;
+  --note: #f1efe8;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --plane: #0d0d0d; --surface: #1a1a19; --ink: #ffffff; --ink2: #c3c2b7; --muted: #898781;
+    --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,.10); --accent: #5598e7; --accent-wash: rgba(85,152,231,.16);
+    --tone-a: #4b4a46; --tone-b: #8a8983; --tone-c: #5598e7;
+    --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500; --s5: #d55181; --s6: #008300; --s7: #9085e9; --s8: #e66767;
+    --note: #232321;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --plane: #0d0d0d; --surface: #1a1a19; --ink: #ffffff; --ink2: #c3c2b7; --muted: #898781;
+  --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,.10); --accent: #5598e7; --accent-wash: rgba(85,152,231,.16);
+  --tone-a: #4b4a46; --tone-b: #8a8983; --tone-c: #5598e7;
+  --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500; --s5: #d55181; --s6: #008300; --s7: #9085e9; --s8: #e66767;
+  --note: #232321;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--plane); color: var(--ink);
+  font: 15px/1.65 system-ui, -apple-system, "Segoe UI", "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+  padding-inline: 16px; padding-block: 28px 64px;
+}
+main { max-width: 1040px; margin-inline: auto; display: flex; flex-direction: column; gap: 44px; }
+h1 { font-size: 30px; line-height: 1.2; font-weight: 700; margin: 0; letter-spacing: -.01em; text-wrap: balance; }
+h2 { font-size: 21px; line-height: 1.3; font-weight: 650; margin: 0 0 4px; text-wrap: balance; }
+h3 { font-size: 15px; font-weight: 650; margin: 0 0 6px; }
+p { margin: 0; max-width: 68ch; }
+.lede { color: var(--ink2); font-size: 16px; margin-top: 10px; max-width: 70ch; }
+.meta { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 16px; color: var(--ink2); font-size: 13px; }
+.meta b { color: var(--ink); font-weight: 650; font-variant-numeric: tabular-nums; }
+.sub { color: var(--ink2); font-size: 14px; max-width: 72ch; }
+section { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.findings { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 440px), 1fr)); }
+.finding { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px 15px; min-width: 0; }
+.finding h3 { margin-bottom: 4px; text-wrap: balance; }
+.finding p { color: var(--ink2); font-size: 14px; }
+.finding .ev { margin-top: 8px; font-size: 12.5px; color: var(--muted); }
+.controls { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--plane); padding-block: 10px; border-bottom: 1px solid var(--border); }
+.seg { display: inline-flex; max-width: 100%; border: 1px solid var(--border); border-radius: 8px; overflow-x: auto; background: var(--surface); }
+.seg button { flex: none; }
+.seg button { font: inherit; font-size: 13.5px; padding: 6px 13px; border: 0; background: transparent; color: var(--ink2); cursor: pointer; min-height: 34px; }
+.seg button + button { border-left: 1px solid var(--border); }
+.seg button[aria-pressed="true"] { background: var(--accent-wash); color: var(--ink); font-weight: 650; box-shadow: inset 0 -2px 0 var(--accent); }
+.seg button:focus-visible, select:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.controls label { font-size: 13px; color: var(--ink2); display: inline-flex; gap: 8px; align-items: center; }
+select { font: inherit; font-size: 13.5px; padding: 5px 8px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--ink); min-height: 34px; }
+.panel { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 14px 12px; min-width: 0; }
+.panel > .cap { font-size: 13px; color: var(--ink2); margin-bottom: 8px; max-width: 80ch; }
+.scroll { overflow-x: auto; }
+.chart { display: block; width: 100%; min-width: 560px; height: auto; }
+.chart text { fill: var(--ink2); font: 12px system-ui, -apple-system, "Segoe UI", "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif; }
+.chart .strong { fill: var(--ink); font-weight: 650; }
+.chart .muted { fill: var(--muted); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 12.5px; color: var(--ink2); margin-top: 8px; }
+.legend i { display: inline-block; width: 11px; height: 11px; border-radius: 50%; margin-right: 6px; vertical-align: -1px; }
+.legend i.sq { border-radius: 2px; }
+table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+th, td { padding: 7px 10px; text-align: right; border-bottom: 1px solid var(--grid); white-space: nowrap; font-variant-numeric: tabular-nums; }
+th { color: var(--ink2); font-weight: 600; font-size: 12.5px; vertical-align: bottom; white-space: normal; line-height: 1.3; }
+th:first-child, td:first-child, th:nth-child(2), td:nth-child(2) { text-align: left; }
+td.best { font-weight: 700; color: var(--ink); }
+tr:last-child td { border-bottom: 0; }
+.gdot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 7px; }
+.note { background: var(--note); border-radius: 8px; padding: 10px 14px; font-size: 13.5px; color: var(--ink2); max-width: 80ch; }
+.cols2 { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 460px), 1fr)); }
+ul.plain { margin: 0; padding-left: 1.2em; display: flex; flex-direction: column; gap: 6px; color: var(--ink2); font-size: 14px; max-width: 80ch; }
+details { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 10px 16px; }
+details summary { cursor: pointer; font-weight: 650; font-size: 14px; }
+details[open] summary { margin-bottom: 8px; }
+dl { margin: 0; display: grid; grid-template-columns: max-content 1fr; gap: 6px 14px; font-size: 13.5px; color: var(--ink2); }
+dt { color: var(--ink); font-weight: 600; }
+dd { margin: 0; min-width: 0; }
+#tip { position: fixed; z-index: 20; pointer-events: none; background: var(--surface); color: var(--ink); border: 1px solid var(--axis); border-radius: 8px; padding: 8px 10px; font-size: 12.5px; line-height: 1.5; box-shadow: 0 4px 16px rgba(0,0,0,.18); max-width: 260px; opacity: 0; transition: opacity .08s; }
+#tip b { font-weight: 650; }
+footer { color: var(--muted); font-size: 12.5px; max-width: 80ch; }
+@media (max-width: 560px) { h1 { font-size: 25px; } .controls { gap: 8px 12px; } }
+@media (prefers-reduced-motion: reduce) { #tip { transition: none; } }
+</style>
+
+<main>
+  <header>
+    <h1>RAG Search-Flow Comparison</h1>
+    <p class="lede">Chunking and embedding are fixed; only the search flow changes. Up to 8 flows are compared on answer quality and cost across three RAGBench datasets and a reduced BrowseComp-Plus.</p>
+    <div class="meta" id="meta"></div>
+  </header>
+
+  <section id="findings-sec">
+    <div>
+      <h2>Key findings</h2>
+      <p class="sub">Numbers come from the charts and paired comparisons below. Differences are always "first minus second", with 95% confidence intervals in parentheses. Each RAGBench dataset has only 66 questions, so only large differences are visible.</p>
+    </div>
+    <div class="findings" id="findings"></div>
+  </section>
+
+  <section id="explore">
+    <div>
+      <h2>Results by group</h2>
+      <p class="sub">Pick a dataset and a retrieval scope. "Full corpus" searches the whole (reduced) corpus; "candidate pool" is a small per-question pool of fixed size (RAGBench 300, BrowseComp-Plus 1,500 chunks). G5 (Jev per-chunk retrieval) can only run on the pool, and the G4-vs-G5 comparison is only fair there.</p>
+    </div>
+    <div class="controls" role="group" aria-label="Choose dataset and retrieval scope">
+      <div class="seg" id="seg-ds" role="group" aria-label="Dataset"></div>
+      <div class="seg" id="seg-set" role="group" aria-label="Retrieval scope"></div>
+      <label>Chart metric
+        <select id="metric">
+          <option value="completeness">completeness (how many key sentences the answer covers)</option>
+          <option value="faithfulness">faithfulness (share of claims supported by the evidence)</option>
+          <option value="fully_faithful">fully faithful rate (every claim supported)</option>
+        </select>
+      </label>
+    </div>
+    <div id="ds-note"></div>
+
+    <div class="panel">
+      <div class="cap" id="scatter-cap"></div>
+      <div class="scroll"><svg class="chart" id="scatter" role="img" aria-labelledby="scatter-cap"></svg></div>
+      <div class="legend" id="scatter-legend"></div>
+    </div>
+
+    <div class="panel">
+      <div class="cap">Results per group (same questions for every group). Bold marks the best value in each column. Cost covers only the GLM, Jev and query embedding used to answer, not the grading judge.</div>
+      <div class="scroll"><table id="tbl"></table></div>
+    </div>
+
+    <div class="panel">
+      <div class="cap">Where the money goes: share of per-question cost by component; total cost per 1,000 questions on the right.</div>
+      <div class="scroll"><svg class="chart" id="costbars" role="img" aria-label="Cost breakdown per group"></svg></div>
+      <div class="legend">
+        <span><i class="sq" style="background:var(--tone-a)"></i>Generation and queries (GLM, query embedding)</span>
+        <span><i class="sq" style="background:var(--tone-b)"></i>Jev stop judge</span>
+        <span><i class="sq" style="background:var(--tone-c)"></i>Jev per-chunk retrieval (G5 and G8)</span>
+      </div>
+    </div>
+  </section>
+
+  <section id="paired">
+    <div>
+      <h2>Paired comparisons</h2>
+      <p class="sub">Same questions, differenced per question. A filled dot means the confidence interval excludes 0. There are many comparisons here and no multiple-comparison correction, so a single filled dot may be chance; patterns that repeat across datasets are more credible.</p>
+    </div>
+    <div class="panel">
+      <div class="scroll"><svg class="chart" id="forest" role="img" aria-label="Paired differences with confidence intervals"></svg></div>
+      <div class="legend">
+        <span><i style="background:var(--accent)"></i>CI excludes 0</span>
+        <span><i style="background:transparent;border:2px solid var(--muted);width:7px;height:7px"></i>CI includes 0 (no visible difference)</span>
+        <span>Difference = first &minus; second; a dot right of 0 means the first is higher</span>
+      </div>
+    </div>
+  </section>
+
+  <section id="cost">
+    <div>
+      <h2>Cost</h2>
+      <p class="sub">Actual spend, summed over every cached API call (dev tuning, pilots, test, grading, and the techqa rerun caused by a data problem). Prices are each vendor's public list price.</p>
+    </div>
+    <div class="cols2">
+      <div class="panel">
+        <div class="cap">Spend so far (USD)</div>
+        <div class="scroll"><table id="spend"></table></div>
+      </div>
+      <div class="panel">
+        <div class="cap">Answering cost per 1,000 questions (USD, excluding grading)</div>
+        <div class="scroll"><table id="cost1k"></table></div>
+      </div>
+    </div>
+    <div class="note" id="cost-note"></div>
+  </section>
+
+  <section id="judges">
+    <div>
+      <h2>Are the stop judges and the grading judge reliable?</h2>
+      <p class="sub">G3 and G4 rely on a judge to decide when to stop. The table shows, on the dev questions, how well each judge separates "all gold documents are already in the evidence" from "not yet". Dev only; test was not touched.</p>
+    </div>
+    <div class="panel">
+      <div class="scroll"><table id="judgetbl"></table></div>
+    </div>
+    <div class="note" id="judge-note"></div>
+  </section>
+
+  <section id="limits">
+    <div><h2>Things to know when reading this</h2></div>
+    <ul class="plain" id="limits-list"></ul>
+    <details>
+      <summary>How the metrics are computed</summary>
+      <dl>
+        <dt>faithfulness</dt><dd>The judge splits the answer into atomic claims and checks each against the evidence the group actually used; the score is the supported share. Answers with no claims (e.g. "insufficient evidence") are excluded from the mean and reported separately as the abstain rate.</dd>
+        <dt>fully faithful rate</dt><dd>Share of questions where every claim in the answer is supported by the evidence.</dd>
+        <dt>completeness</dt><dd>Of the RAGBench-annotated relevant sentences, how many the answer conveys. The reference sentences are independent of retrieval, so a flow that fails to retrieve the key information scores low.</dd>
+        <dt>mean rounds</dt><dd>Retrieval rounds executed at stop time; for ReAct, the number of searches.</dd>
+        <dt>truncated by R_max</dt><dd>Share of questions that ran to the round limit (6) before stopping.</dd>
+        <dt>cost per 1k questions</dt><dd>GLM, Jev and query-embedding cost per 1,000 questions, computed as tokens times list price. The GLM output price already includes reasoning tokens (counted once).</dd>
+        <dt>G1&ndash;G8</dt><dd>G1 single round; G2 ReAct; G3 multi-round with an LLM stop judge; G4 multi-round with a Jev stop judge; G5 Jev stop judge plus Jev per-chunk retrieval; G6 fixed number of rounds; G7 stop judged against gold (upper-bound reference); G8 embedding top-200 shortlist re-ranked by Jev (BrowseComp-Plus only).</dd>
+      </dl>
+    </details>
+  </section>
+
+  <footer id="foot"></footer>
+</main>
+<div id="tip" role="tooltip"></div>
+
+<script>
+const D = __DATA__;
+const GC = {G1:'var(--s1)',G2:'var(--s2)',G3:'var(--s3)',G4:'var(--s4)',G5:'var(--s5)',G6:'var(--s6)',G7:'var(--s7)',G8:'var(--s8)'};
+const DS = ['covidqa','hotpotqa','techqa','bcp100'].filter((d) => D.datasets[d]);
+const RB = DS.filter((d) => d !== 'bcp100');   // RAGBench datasets
+const isBcp = (ds) => ds === 'bcp100';
+const METRIC_LABEL = {completeness:'completeness', faithfulness:'faithfulness', fully_faithful:'fully faithful rate', accuracy:'accuracy', recall_final:'final document recall', covered_all_final:'all-gold coverage'};
+const METRIC_OPTIONS = {
+    rb: [['completeness','completeness (how many key sentences the answer covers)'],['faithfulness','faithfulness (share of claims supported by the evidence)'],['fully_faithful','fully faithful rate (every claim supported)']],
+    bcp: [['accuracy','accuracy (answer matches the reference answer)'],['recall_final','final document recall (share of gold documents in the evidence)'],['covered_all_final','all-gold coverage (every gold document is in the evidence)']]
+};
+const kindOf = (ds) => isBcp(ds) ? 'bcp' : 'rb';
+const CONTRAST_LABEL = {
+    'G3|G4':'Judge: G3 LLM − G4 Jev', 'G4|G5':'Retrieval: G4 embedding − G5 Jev', 'G2|G3':'G2 ReAct − G3 separated judge',
+    'G4|G8':'G4 embedding − G8 Jev re-rank of top 200', 'G8|G5':'G8 re-rank of top 200 − G5 Jev full scoring',
+    'G1|G2':'G1 single round − G2 ReAct', 'G1|G3':'G1 single round − G3 multi-round', 'G4|G6':'G4 Jev stop − G6 fixed rounds', 'G4|G7':'G4 Jev stop − G7 oracle'
+};
+const $ = (id) => document.getElementById(id);
+const NS = 'http://www.w3.org/2000/svg';
+const el = (tag, attrs = {}, text) => { const n = document.createElementNS(NS, tag); for (const k in attrs) n.setAttribute(k, attrs[k]); if (text != null) n.textContent = text; return n; };
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const n3 = (v) => v == null ? '–' : v.toFixed(3);
+const pct = (v) => v == null ? '–' : (v * 100).toFixed(0) + '%';
+const usd = (v, d = 2) => v == null ? '–' : '$' + v.toFixed(d);
+const k1 = (c) => c * 1000;                       // USD per question -> USD per 1,000 questions
+const fmtK = (v) => v >= 10 ? '$' + v.toFixed(1) : '$' + v.toFixed(2);
+const sgn = (v, d = 3) => (v >= 0 ? '+' : '−') + Math.abs(v).toFixed(d);
+
+function get(ds, set, g) { return D.datasets[ds].settings[set].groups.find((x) => x.group === g); }
+function contrast(ds, set, a, b) { return D.datasets[ds].settings[set].contrasts.find((c) => c.a === a && c.b === b); }
+function dif(ds, set, a, b, m = 'completeness') { const c = contrast(ds, set, a, b); return c && c.metrics[m] ? c.metrics[m].diff : null; }
+function ci(d) { return d ? `${sgn(d.mean_diff)} (${sgn(d.lo, 2)} to ${sgn(d.hi, 2)})` : '–'; }
+const dsLabel = (ds) => D.datasets[ds].label;
+const pval = (p) => p == null ? '–' : (p < 0.001 ? '< 0.001' : p.toFixed(3));
+
+/* state */
+let st = { ds: 'covidqa', set: 'full', metric: 'completeness' };
+try { const s = JSON.parse(localStorage.getItem('ragbench-report') || '{}'); if (DS.includes(s.ds)) st.ds = s.ds; if (s.set === 'full' || s.set === 'pool') st.set = s.set; if (METRIC_LABEL[s.metric]) st.metric = s.metric; }  catch (e) {}
+const h = (location.hash || '').replace('#', ''); if (DS.includes(h)) st.ds = h;
+function fixMetric() { const ok = METRIC_OPTIONS[kindOf(st.ds)].map((o) => o[0]); if (!ok.includes(st.metric)) st.metric = ok[0]; }
+function save() { try { localStorage.setItem('ragbench-report', JSON.stringify(st)); } catch (e) {} }
+
+/* tooltip */
+const tip = $('tip');
+function showTip(html, x, y) {
+  tip.innerHTML = html; tip.style.opacity = 1;
+  const w = tip.offsetWidth, hgt = tip.offsetHeight;
+  tip.style.left = Math.min(Math.max(8, x + 14), innerWidth - w - 8) + 'px';
+  tip.style.top = Math.min(Math.max(8, y + 14), innerHeight - hgt - 8) + 'px';
+}
+const hideTip = () => { tip.style.opacity = 0; };
+function bindTip(node, htmlFn) {
+  node.addEventListener('pointermove', (e) => showTip(htmlFn(), e.clientX, e.clientY));
+  node.addEventListener('pointerleave', hideTip);
+  node.addEventListener('click', (e) => { showTip(htmlFn(), e.clientX, e.clientY); });
+}
+document.addEventListener('pointerdown', (e) => { if (!e.target.closest('svg')) hideTip(); });
+
+function niceTicks(lo, hi, n = 5) {
+  const span = hi - lo, raw = span / n, p = Math.pow(10, Math.floor(Math.log10(raw)));
+  const f = raw / p, step = (f < 1.5 ? 1 : f < 3 ? 2 : f < 7 ? 5 : 10) * p;
+  const out = []; for (let v = Math.ceil(lo / step) * step; v <= hi + 1e-9; v += step) out.push(+v.toFixed(10));
+  return out;
+}
+
+/* ---------- header ---------- */
+function renderMeta() {
+  const tot = Object.values(D.spend.by_dataset).reduce((s, r) => s + Object.entries(r).filter(([k]) => !k.startsWith('_')).reduce((a, [, v]) => a + v, 0), 0)
+    + D.spend.judge_calibration;
+  const q = D.config.test_questions_per_dataset;
+    $('meta').innerHTML = `<span>Datasets <b>${DS.length}</b> (RAGBench <b>${q.covidqa}</b> test questions each${D.datasets.bcp100 ? ', BrowseComp-Plus <b>' + q.bcp100 + '</b>' : ''})</span><span>Flows <b>7–8</b></span><span>Repeats <b>${D.config.repeats}</b>, quality graded on repeat 1 only</span><span>Actual spend <b>${usd(tot, 0)}</b></span>`;
+}
+
+/* ---------- findings (numbers computed from the data) ---------- */
+function renderFindings() {
+  const c = (ds, s, a, b, m) => dif(ds, s, a, b, m);
+  const mc = (ds, s, a, b) => ci(c(ds, s, a, b));
+  const rat = (ds, s, x, y, f) => get(ds, s, x)[f] / get(ds, s, y)[f];
+  const costRatio = (ds, s, x, y) => get(ds, s, x).cost._total / get(ds, s, y).cost._total;
+  const items = [
+        { h: 'Whether multi-round search helps depends on how much the first round misses',
+            p: `Multi-hop and long-document questions benefit: multi-round (G3) beats single-round (G1) on completeness by ${sgn(-c('hotpotqa','full','G1','G3').mean_diff)} on hotpotqa (full corpus), and by ${sgn(-c('techqa','full','G1','G3').mean_diff)} (full) / ${sgn(-c('techqa','pool','G1','G3').mean_diff)} (pool) on techqa. covidqa gets no benefit (${sgn(-c('covidqa','full','G1','G3').mean_diff)}), and there is no difference when the first round already finds the documents (hotpotqa pool ${sgn(-c('hotpotqa','pool','G1','G3').mean_diff)}).`,
+            ev: `Cost: about ${Math.min(...RB.map(d=>costRatio(d,'full','G3','G1'))).toFixed(0)}–${Math.max(...RB.map(d=>costRatio(d,'full','G3','G1'))).toFixed(0)}x the per-question cost of single-round (full corpus).` },
+        { h: 'Swapping the stop judge for Jev does not improve answer quality; cost goes both ways',
+            p: `Across the six G3 (LLM judge) vs G4 (Jev judge) comparisons, completeness differences are all within ±0.04; only covidqa pool is significant (G4 higher by ${sgn(-c('covidqa','pool','G3','G4').mean_diff)}). G4 cost varies by dataset (covidqa ~45% higher, hotpotqa ~14% lower, techqa about equal). The Jev judge often refuses to stop: the share truncated by the round limit is ${RB.map(d=>pct(get(d,'full','G4').r_max_truncated)).join(' / ')} (G3: ${RB.map(d=>pct(get(d,'full','G3').r_max_truncated)).join(' / ')}).`,
+            ev: `Judge AUC for "all gold documents present" (dev): covidqa ${n3(D.datasets.covidqa.frozen.jev.auc)}, hotpotqa ${n3(D.datasets.hotpotqa.frozen.jev.auc)}, techqa ${n3(D.datasets.techqa.frozen.jev.auc)}.` },
+        { h: 'Jev per-chunk retrieval matches embedding quality on RAGBench, at much higher cost and latency',
+            p: `Within the candidate pool, the G5-vs-G4 completeness difference is not significant on any of the three datasets (${RB.map(d=>sgn(-c(d,'pool','G4','G5').mean_diff)).join(', ')}), and faithfulness shows no difference either. Per-question cost is ${Math.min(...RB.map(d=>costRatio(d,'pool','G5','G4'))).toFixed(0)}–${Math.max(...RB.map(d=>costRatio(d,'pool','G5','G4'))).toFixed(0)}x that of G4, and p50 latency is ${Math.min(...RB.map(d=>rat(d,'pool','G5','G4','latency_p50_s'))).toFixed(1)}–${Math.max(...RB.map(d=>rat(d,'pool','G5','G4','latency_p50_s'))).toFixed(1)}x.`,
+            ev: `This is a 300-chunk candidate pool; scanning the full corpus would take hours per round and is infeasible.` },
+        { h: 'ReAct trades faithfulness for coverage',
+            p: `ReAct (G2) has higher completeness than the separated-judge G3 (${RB.flatMap(d=>['full','pool'].map(s=>sgn(c(d,s,'G2','G3').mean_diff,2))).join(', ')}), but lower faithfulness in all six comparisons (${RB.flatMap(d=>['full','pool'].map(s=>sgn(c(d,s,'G2','G3','faithfulness').mean_diff,2))).join(', ')}). techqa is the clearest case: fully faithful rate ${pct(get('techqa','pool','G2').fully_faithful)} vs ${pct(get('techqa','pool','G3').fully_faithful)}.`,
+            ev: `G2 has no evidence cap (it keeps the full search history), so its evidence volume differs from the other groups; this is not a clean single-variable comparison.` },
+        { h: 'A good stop rule can save about half the cost',
+            p: `The oracle stop (G7, judged against gold) is ${Math.round(100*Math.min(...RB.map(d=>1-costRatio(d,'full','G7','G4'))))}–${Math.round(100*Math.max(...RB.map(d=>1-costRatio(d,'full','G7','G4'))))}% cheaper per question than the Jev stop (G4) on the full corpus, with small quality differences of mixed sign. Stop rules mainly affect cost, and neither the LLM nor the Jev judge captures that saving yet.`,
+            ev: `On hotpotqa and techqa R_fixed is 1, so G6 equals G1 and the fixed-rounds comparison is meaningless there.` },
+        { h: 'Faithfulness is almost always at the ceiling',
+            p: `Excluding ReAct, every group scores ${Math.min(...RB.flatMap(d=>['full','pool'].flatMap(s=>D.datasets[d].settings[s].groups.filter(g=>g.group!=='G2').map(g=>g.faithfulness)))).toFixed(2)}–${Math.max(...RB.flatMap(d=>['full','pool'].flatMap(s=>D.datasets[d].settings[s].groups.filter(g=>g.group!=='G2').map(g=>g.faithfulness)))).toFixed(2)} on faithfulness, which barely discriminates; completeness and cost are what separate the groups.`,
+            ev: `The judge is stricter than the human annotations (calibration: recall on fully faithful ${n3(D.calibration.adherence.recall)}), so absolute values are low, but group comparisons are unaffected.` }
+  ];
+  const all = items.concat(bcpFindings());
+  $('findings').innerHTML = all.map((i) => `<article class="finding"><h3>${esc(i.h)}</h3><p>${i.p}</p><div class="ev">${i.ev}</div></article>`).join('');
+}
+
+/* BrowseComp-Plus findings are written from the final numbers; empty until bcp100 data exist */
+function bcpFindings() { return typeof BCP_FINDINGS === 'function' ? BCP_FINDINGS() : []; }
+
+/* ---------- controls ---------- */
+function renderControls() {
+  const mk = (box, opts, key) => {
+    box.innerHTML = '';
+    opts.forEach(([v, label]) => {
+      const b = document.createElement('button'); b.type = 'button'; b.textContent = label; b.setAttribute('aria-pressed', st[key] === v);
+      b.onclick = () => { st[key] = v; save(); if (key === 'ds') { try { history.replaceState(null, '', '#' + v); } catch (e) {} } renderAll(); };
+      box.appendChild(b);
+    });
+  };
+  fixMetric();
+  mk($('seg-ds'), DS.map((d) => [d, dsLabel(d)]), 'ds');
+    mk($('seg-set'), [['full', 'Full corpus'], ['pool', D.datasets[st.ds].settings.pool.label]], 'set');
+  $('metric').innerHTML = METRIC_OPTIONS[kindOf(st.ds)].map(([v, l]) => `<option value="${v}">${l}</option>`).join('');
+  $('metric').value = st.metric;
+}
+$('metric').onchange = (e) => { st.metric = e.target.value; save(); renderScatter(); };
+
+function renderNote() {
+  const s = D.datasets[st.ds].settings[st.set], f = D.datasets[st.ds].frozen;
+    const parts = [`${s.questions} questions on this page`];
+    if (s.failed_questions.length) parts.push(`${s.failed_questions.length} questions were blocked by the model provider's content filter and are excluded from every group`);
+    parts.push(`τ tuned on dev = ${f.tau.toFixed(2)}, R_fixed = ${f.r_fixed}`);
+    let html = `<p class="sub">${parts.join('; ')}.</p>`;
+    if (isBcp(st.ds)) html += `<div class="note" style="margin-top:8px">The BrowseComp-Plus corpus here is not the full 100k documents: to fit the embedding budget it keeps only the gold, evidence and hard-negative documents of the 100 sampled questions (about 8k documents). Recall and accuracy are therefore optimistic and cannot be compared with full-corpus results.</div>`;
+    if (f.r_fixed === 1) html += `<div class="note" style="margin-top:8px">R_fixed = 1 for this dataset, so G6 (fixed rounds) equals G1 (single round) and the two give identical results.</div>`;
+  $('ds-note').innerHTML = html;
+}
+
+/* ---------- scatter: quality vs cost ---------- */
+function renderScatter() {
+  const svg = $('scatter'); svg.innerHTML = '';
+  const s = D.datasets[st.ds].settings[st.set], m = st.metric;
+  const W = 760, H = 380, L = 62, R = 28, T = 18, B = 52;
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  const pts = s.groups.map((g) => ({ g, x: k1(g.cost._total), y: g[m] })).filter((p) => p.y != null);
+  const xlo = 0.1, xhi = 100;
+  const X = (v) => L + (Math.log10(v) - Math.log10(xlo)) / (Math.log10(xhi) - Math.log10(xlo)) * (W - L - R);
+  const ys = pts.map((p) => p.y); let ylo = Math.min(...ys), yhi = Math.max(...ys);
+  const pad = Math.max((yhi - ylo) * 0.25, isBcp(st.ds) ? 0.05 : 0.03); ylo = Math.max(0, ylo - pad); yhi = Math.min(1, yhi + pad);
+  const Y = (v) => H - B - (v - ylo) / (yhi - ylo) * (H - T - B);
+    $('scatter-cap').textContent = `${dsLabel(st.ds)} · ${s.label}: ${METRIC_LABEL[m]} (y) vs cost per 1,000 questions (x, log scale). Up and to the left is better; the dashed line joins groups that no other group beats on both axes.`;
+  // grid + axes
+  niceTicks(ylo, yhi, 5).forEach((v) => {
+    svg.appendChild(el('line', { x1: L, x2: W - R, y1: Y(v), y2: Y(v), stroke: 'var(--grid)', 'stroke-width': 1 }));
+    svg.appendChild(el('text', { x: L - 8, y: Y(v) + 4, 'text-anchor': 'end' }, v.toFixed(m === 'completeness' ? 2 : 2)));
+  });
+  [0.1, 1, 10, 100].forEach((v) => {
+    svg.appendChild(el('line', { x1: X(v), x2: X(v), y1: T, y2: H - B, stroke: 'var(--grid)', 'stroke-width': 1 }));
+    svg.appendChild(el('text', { x: X(v), y: H - B + 18, 'text-anchor': 'middle' }, v >= 1 ? '$' + v : '$' + v));
+  });
+  svg.appendChild(el('line', { x1: L, x2: W - R, y1: H - B, y2: H - B, stroke: 'var(--axis)', 'stroke-width': 1.5 }));
+    svg.appendChild(el('text', { x: (L + W - R) / 2, y: H - 8, 'text-anchor': 'middle', class: 'muted' }, 'Cost per 1,000 questions (USD, log scale, excluding grading)'));
+  svg.appendChild(el('text', { x: 14, y: (T + H - B) / 2, 'text-anchor': 'middle', transform: `rotate(-90 14 ${(T + H - B) / 2})`, class: 'muted' }, METRIC_LABEL[m]));
+  // frontier
+  const sorted = [...pts].sort((a, b) => a.x - b.x || b.y - a.y); let best = -1; const fr = [];
+  sorted.forEach((p) => { if (p.y > best + 1e-9) { fr.push(p); best = p.y; } });
+  if (fr.length > 1) svg.appendChild(el('polyline', { points: fr.map((p) => `${X(p.x)},${Y(p.y)}`).join(' '), fill: 'none', stroke: 'var(--muted)', 'stroke-width': 1.5, 'stroke-dasharray': '5 4' }));
+  // cluster coincident points
+  const clusters = [];
+  pts.forEach((p) => { p.px = X(p.x); p.py = Y(p.y); const c = clusters.find((c) => Math.hypot(c.px - p.px, c.py - p.py) < 7); if (c) c.items.push(p); else clusters.push({ px: p.px, py: p.py, items: [p] }); });
+  const boxes = [];
+  const collide = (b) => boxes.some((o) => !(b.x2 < o.x1 || b.x1 > o.x2 || b.y2 < o.y1 || b.y1 > o.y2)) || b.x1 < L - 4 || b.x2 > W - 4 || b.y1 < 4;
+  clusters.forEach((c) => boxes.push({ x1: c.px - 11, x2: c.px + 11, y1: c.py - 11, y2: c.py + 11 }));
+  clusters.forEach((c) => {
+    const label = c.items.map((p) => p.g.group).join(' = '), w = label.length * 7.2 + 4;
+    const cands = [
+      { x: c.px + 14, y: c.py + 4, a: 'start', b: { x1: c.px + 12, x2: c.px + 14 + w, y1: c.py - 9, y2: c.py + 7 } },
+      { x: c.px - 14, y: c.py + 4, a: 'end', b: { x1: c.px - 14 - w, x2: c.px - 12, y1: c.py - 9, y2: c.py + 7 } },
+      { x: c.px, y: c.py - 15, a: 'middle', b: { x1: c.px - w / 2, x2: c.px + w / 2, y1: c.py - 28, y2: c.py - 13 } },
+      { x: c.px, y: c.py + 26, a: 'middle', b: { x1: c.px - w / 2, x2: c.px + w / 2, y1: c.py + 14, y2: c.py + 29 } }
+    ];
+    const pick = cands.find((k) => !collide(k.b)) || cands[0]; boxes.push(pick.b);
+    c.label = { label, pick };
+  });
+  clusters.forEach((c) => {
+        const grp = el('g', { tabindex: 0, role: 'img', 'aria-label': `${c.label.label}: cost ${fmtK(c.items[0].x)}, ${METRIC_LABEL[m]} ${n3(c.items[0].y)}` });
+    c.items.slice(1).forEach((p) => grp.appendChild(el('circle', { cx: c.px, cy: c.py, r: 11, fill: 'none', stroke: GC[p.g.group], 'stroke-width': 3 })));
+    grp.appendChild(el('circle', { cx: c.px, cy: c.py, r: 7, fill: GC[c.items[0].g.group], stroke: 'var(--surface)', 'stroke-width': 2 }));
+    grp.appendChild(el('circle', { cx: c.px, cy: c.py, r: 15, fill: 'transparent' }));
+    const t = el('text', { x: c.label.pick.x, y: c.label.pick.y, 'text-anchor': c.label.pick.a, class: 'strong' }, c.label.label);
+    grp.appendChild(t);
+        const info = () => c.items.map((p) => `<b>${p.g.group} ${esc(p.g.name)}</b><br>${METRIC_LABEL[m]} ${n3(p.y)} · cost ${fmtK(p.x)}/1k<br>${isBcp(st.ds) ? 'accuracy ' + n3(p.g.accuracy) + ' · final recall ' + n3(p.g.recall_final) : 'completeness ' + n3(p.g.completeness) + ' · faithfulness ' + n3(p.g.faithfulness)}<br>mean ${p.g.mean_rounds.toFixed(1)} rounds · p50 latency ${p.g.latency_p50_s.toFixed(1)} s`).join('<hr style="border:0;border-top:1px solid var(--grid);margin:6px 0">');
+    bindTip(grp, info);
+    grp.addEventListener('focus', () => { const r = grp.getBoundingClientRect(); showTip(info(), r.left, r.top); });
+    grp.addEventListener('blur', hideTip);
+    svg.appendChild(grp);
+  });
+  $('scatter-legend').innerHTML = s.groups.map((g) => `<span><i style="background:${GC[g.group]}"></i>${g.group} ${esc(g.name)}</span>`).join('');
+}
+
+/* ---------- table ---------- */
+function renderTable() {
+  const s = D.datasets[st.ds].settings[st.set], G = s.groups;
+  const best = (f, dir = 1) => { const v = G.map((g) => f(g)).filter((x) => x != null); return dir > 0 ? Math.max(...v) : Math.min(...v); };
+    const common = [['mean rounds', (g) => g.mean_rounds, (v) => v.toFixed(2), 0], ['truncated by R_max', (g) => g.r_max_truncated, pct, 0],
+        ['final recall', (g) => g.recall_final, n3, 1], ['cost / 1k q', (g) => k1(g.cost._total), fmtK, -1], ['latency p50', (g) => g.latency_p50_s, (v) => v.toFixed(1) + ' s', -1], ['latency p95', (g) => g.latency_p95_s, (v) => v.toFixed(0) + ' s', 0]];
+  const cols = isBcp(st.ds)
+        ? [['accuracy', (g) => g.accuracy, pct, 1], ['all-gold coverage', (g) => g.covered_all_final, pct, 1], ['premature stop', (g) => g.premature_stop, pct, -1], ['cost / correct answer', (g) => g.cost_per_correct, (v) => '$' + v.toFixed(4), -1], ...common]
+        : [['faithfulness', (g) => g.faithfulness, n3, 1], ['fully faithful', (g) => g.fully_faithful, pct, 1], ['completeness', (g) => g.completeness, n3, 1], ['abstain rate', (g) => g.abstain_rate, pct, 0], ...common];
+  const bests = cols.map(([, f, , d]) => d ? best(f, d) : null);
+    $('tbl').innerHTML = `<thead><tr><th>Group</th><th>Flow</th>${cols.map(([n]) => `<th>${n}</th>`).join('')}</tr></thead><tbody>` +
+    G.map((g) => `<tr><td><span class="gdot" style="background:${GC[g.group]}"></span>${g.group}</td><td>${esc(g.name)}</td>${cols.map(([, f, fm], i) => { const v = f(g); return `<td class="${bests[i] != null && v != null && Math.abs(v - bests[i]) < 1e-9 ? 'best' : ''}">${v == null ? '–' : fm(v)}</td>`; }).join('')}</tr>`).join('') + '</tbody>';
+}
+
+/* ---------- cost composition ---------- */
+function renderCostBars() {
+  const svg = $('costbars'); svg.innerHTML = '';
+  const G = D.datasets[st.ds].settings[st.set].groups;
+  const W = 760, rowH = 34, T = 6, L = 190, R = 110, H = T + G.length * rowH + 6;
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  const bw = W - L - R;
+  G.forEach((g, i) => {
+    const c = g.cost, tot = c._total, y = T + i * rowH;
+        const parts = [['Generation and queries', (c.glm || 0) + (c.embed || 0), 'var(--tone-a)'], ['Jev stop judge', c.jev_judge || 0, 'var(--tone-b)'], ['Jev per-chunk retrieval', c.jev_rank || 0, 'var(--tone-c)']];
+    svg.appendChild(el('text', { x: 8, y: y + 20, class: 'strong' }, `${g.group}  ${g.name}`));
+    let x = L; const grp = el('g', { tabindex: 0 });
+    parts.forEach(([name, v, col]) => {
+      const w = tot ? v / tot * bw : 0; if (w <= 0.4) return;
+      grp.appendChild(el('rect', { x: x + 1, y: y + 6, width: Math.max(w - 2, 1), height: 20, fill: col, rx: 2 })); x += w;
+    });
+    grp.appendChild(el('rect', { x: L, y: y + 2, width: bw, height: 28, fill: 'transparent' }));
+        bindTip(grp, () => `<b>${g.group} ${esc(g.name)}</b><br>` + parts.map(([n, v]) => `${n}: ${fmtK(k1(v))}/1k (${tot ? (v / tot * 100).toFixed(0) : 0}%)`).join('<br>'));
+    svg.appendChild(grp);
+    svg.appendChild(el('text', { x: W - 8, y: y + 20, 'text-anchor': 'end', class: 'strong' }, fmtK(k1(tot))));
+  });
+}
+
+/* ---------- forest ---------- */
+function renderForest() {
+  const svg = $('forest'); svg.innerHTML = '';
+  const s = D.datasets[st.ds].settings[st.set], C = s.contrasts;
+  const W = 900, rowH = 38, T = 54, L = 224, H = T + C.length * rowH + 14;
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  const bcp = isBcp(st.ds), pm = bcp ? 'correct' : 'fully_faithful';
+    const panels = bcp ? [['correct', 'Accuracy difference', L + 10, 330]] : [['completeness', 'completeness difference', L + 10, 190], ['faithfulness', 'faithfulness difference', L + 250, 190]];
+    const extra = [[bcp ? 'Accuracy\nMcNemar p' : 'Fully faithful\nMcNemar p', L + 540], ['Cost difference\n(USD per 1k q)', L + 670]];
+  svg.appendChild(el('text', { x: 8, y: T - 12, class: 'strong' }, `${dsLabel(st.ds)}・${s.label}`));
+  panels.forEach(([m, title, x0, w]) => {
+    const lim = Math.max(0.05, Math.ceil(Math.max(...C.filter((c) => c.metrics[m] && c.metrics[m].diff).flatMap((c) => [Math.abs(c.metrics[m].diff.lo), Math.abs(c.metrics[m].diff.hi)])) * 20) / 20);
+    const X = (v) => x0 + (v + lim) / (2 * lim) * w;
+    svg.appendChild(el('text', { x: x0 + w / 2, y: T - 28, 'text-anchor': 'middle', class: 'strong' }, title));
+    niceTicks(-lim, lim, 4).forEach((v) => {
+      svg.appendChild(el('line', { x1: X(v), x2: X(v), y1: T - 10, y2: H - 22, stroke: v === 0 ? 'var(--axis)' : 'var(--grid)', 'stroke-width': v === 0 ? 1.5 : 1 }));
+      svg.appendChild(el('text', { x: X(v), y: H - 6, 'text-anchor': 'middle', class: 'muted' }, v === 0 ? '0' : sgn(v, 2)));
+    });
+    C.forEach((c, i) => {
+      const y = T + i * rowH + rowH / 2 - 4; const d = c.metrics[m] && c.metrics[m].diff; if (!d) return;
+      const sig = d.lo > 0 || d.hi < 0; const g = el('g', { tabindex: 0 });
+      g.appendChild(el('line', { x1: X(d.lo), x2: X(d.hi), y1: y, y2: y, stroke: sig ? 'var(--accent)' : 'var(--muted)', 'stroke-width': 2.5, 'stroke-linecap': 'round' }));
+      g.appendChild(el('circle', { cx: X(d.mean_diff), cy: y, r: 5.5, fill: sig ? 'var(--accent)' : 'var(--surface)', stroke: sig ? 'var(--accent)' : 'var(--muted)', 'stroke-width': 2 }));
+      g.appendChild(el('rect', { x: x0, y: y - 15, width: w, height: 30, fill: 'transparent' }));
+            bindTip(g, () => `<b>${CONTRAST_LABEL[c.a + '|' + c.b]}</b><br>${title}: ${ci(d)}<br>${c.n} questions · ${sig ? 'CI excludes 0' : 'CI includes 0'}`);
+      svg.appendChild(g);
+    });
+  });
+  C.forEach((c, i) => {
+    const y = T + i * rowH + rowH / 2;
+    svg.appendChild(el('text', { x: 8, y, class: 'strong' }, CONTRAST_LABEL[c.a + '|' + c.b]));
+    const ff = c.metrics[pm] && c.metrics[pm].mcnemar;
+    svg.appendChild(el('text', { x: L + 540, y, 'text-anchor': 'end' }, ff ? pval(ff.p_value) : '–'));
+    const cd = c.cost_diff_usd; svg.appendChild(el('text', { x: L + 670, y, 'text-anchor': 'end' }, cd ? sgn(cd.mean_diff * 1000, 2) : '–'));
+  });
+  extra.forEach(([t, x]) => t.split('\n').forEach((line, k) => svg.appendChild(el('text', { x: x, y: T - 28 + k * 14, 'text-anchor': 'end', class: k ? 'muted' : 'strong' }, line))));
+}
+
+/* ---------- static tables ---------- */
+function renderCost() {
+    const vend = ['GLM (z.ai)', 'Jev', 'Judge (mimo)', 'OpenAI embedding'];
+  const rows = DS.map((d) => [dsLabel(d), ...vend.map((v) => D.spend.by_dataset[d][v])]);
+  const tot = (r) => r.slice(1).reduce((a, b) => a + b, 0);
+  const sums = vend.map((v, i) => rows.reduce((a, r) => a + r[i + 1], 0));
+  const grand = sums.reduce((a, b) => a + b, 0) + D.spend.judge_calibration;
+    $('spend').innerHTML = `<thead><tr><th>Dataset</th>${vend.map((v) => `<th>${v}</th>`).join('')}<th>Total</th></tr></thead><tbody>` +
+    rows.map((r) => `<tr><td>${r[0]}</td>${r.slice(1).map((v) => `<td>${usd(v)}</td>`).join('')}<td class="best">${usd(tot(r))}</td></tr>`).join('') +
+        `<tr><td>Judge calibration</td><td></td><td></td><td>${usd(D.spend.judge_calibration)}</td><td></td><td>${usd(D.spend.judge_calibration)}</td></tr>` +
+        `<tr><td><b>Total</b></td>${sums.map((v, i) => `<td class="best">${usd(v + (i === 2 ? D.spend.judge_calibration : 0))}</td>`).join('')}<td class="best">${usd(grand)}</td></tr></tbody>`;
+  const groups = ['G1','G2','G3','G4','G5','G6','G7','G8'];
+  const cell = (d, s, g) => { const x = D.datasets[d].settings[s].groups.find((y) => y.group === g); return x ? fmtK(k1(x.cost._total)) : '–'; };
+    $('cost1k').innerHTML = `<thead><tr><th>Group</th>${DS.flatMap((d) => [`<th>${d}<br>full corpus</th>`, `<th>${d}<br>pool</th>`]).join('')}</tr></thead><tbody>` +
+    groups.map((g) => `<tr><td><span class="gdot" style="background:${GC[g]}"></span>${g}</td>${DS.flatMap((d) => [`<td>${cell(d, 'full', g)}</td>`, `<td>${cell(d, 'pool', g)}</td>`]).join('')}</tr>`).join('') + '</tbody>';
+  const bc = D.spend.by_dataset.bcp100 ? Object.entries(D.spend.by_dataset.bcp100).filter(([k]) => !k.startsWith('_')).reduce((x, [, v]) => x + v, 0) : null;
+    $('cost-note').innerHTML = `Of actual spend, Jev is ${Math.round(sums[1] / grand * 100)}%, GLM ${Math.round(sums[0] / grand * 100)}%, the grading judge ${Math.round((sums[2] + D.spend.judge_calibration) / grand * 100)}% and embedding ${Math.round(sums[3] / grand * 100)}%. G5's per-chunk retrieval is by far the most expensive flow; every other group answers a question for a fraction of a cent. Per-1k-question costs in this report exclude grading.` + (bc != null ? ` BrowseComp-Plus (bcp100) cost ${usd(bc)} in total, including ${usd(D.spend.by_dataset.bcp100['OpenAI embedding'])} of embedding.` : '');
+
+}
+
+function renderJudges() {
+  const rows = DS.map((d) => { const f = D.datasets[d].frozen; return `<tr><td>${dsLabel(d)}</td><td>${n3(f.jev.auc)}</td><td>${n3(f.jev.ece)}</td><td>${n3(f.llm.balanced_accuracy)}</td><td>${f.tau.toFixed(2)}</td><td>${f.r_fixed}</td><td>${pct(f.jev.positive_rate)}</td></tr>`; }).join('');
+    $('judgetbl').innerHTML = `<thead><tr><th>Dataset</th><th>Jev AUC</th><th>Jev calibration error (ECE)</th><th>LLM judge balanced accuracy</th><th>Frozen τ</th><th>R_fixed</th><th>Share with all gold present (positives)</th></tr></thead><tbody>${rows}</tbody>`;
+  const a = D.calibration.adherence, c = D.calibration.completeness;
+    $('judge-note').innerHTML = `<b>How to read this:</b> on hotpotqa the judge is useful (AUC ${n3(D.datasets.hotpotqa.frozen.jev.auc)}); on covidqa it is near random (${n3(D.datasets.covidqa.frozen.jev.auc)}). Multi-hop questions often miss one document in round 1 and gain it in round 2, which the judge can detect; covidqa's gold documents are mostly redundant and many questions are ambiguous, so there is no signal to rely on.<br><br><b>Grading judge calibration</b> (${D.calibration.n} samples against RAGBench annotations): faithfulness accuracy ${pct(a.accuracy)}, kappa ${n3(a.kappa)}, AUC ${n3(a.auc_fraction_supported)}; the judge is stricter than the annotations (recall ${n3(a.recall)}). Completeness correlates with the annotations at ${n3(c.pearson)} with mean absolute error ${n3(c.mae)}. Conclusion: usable for comparing groups, but absolute numbers run low.`;
+}
+
+function renderLimits() {
+  const q = D.config.test_questions_per_dataset, hp = D.datasets.hotpotqa.settings.full;
+  const items = [
+        `<b>RAGBench sample sizes are small.</b> Each dataset has only ${q.covidqa} questions (a budget decision: a fixed-seed subset of the 400-question test split; hotpotqa full corpus lost ${hp.failed_questions.length} question(s) to the provider's content filter). Paired comparisons can only detect differences of roughly 0.15–0.2 or more, and confidence intervals are wide.`,
+        `<b>Only one repeat is graded.</b> Full-corpus groups ran 3 repeats, but the judge only grades repeat 1; cost, latency, rounds and retrieval metrics use all repeats. Candidate-pool groups ran once.`,
+        `<b>No multiple-comparison correction.</b> This page contains well over a hundred comparisons, so a single "CI excludes 0" may be chance.`,
+        `<b>The reference answers are not human gold.</b> RAGBench responses are model-generated, so answer accuracy is not reported; faithfulness and completeness are used instead. Both depend on the judge (mimo-v2.6-pro), which is strict.`,
+        `<b>G2 (ReAct) is not a clean comparison.</b> It has no evidence cap and keeps the full search history, and its faithfulness is measured against everything it saw.`,
+        `<b>G6 is degenerate on hotpotqa and techqa.</b> R_fixed is the median G4 stop round on dev, which is 1 for both, so G6 equals G1.`,
+        `<b>The candidate pool is easier than the full corpus.</b> Recall is higher in the pool, which shrinks the advantage of multi-round search; the G4-vs-G5 conclusions apply only to the pool (RAGBench 300 chunks, BrowseComp-Plus 1,500 chunks), and on BrowseComp-Plus the pool always contains the answer documents.`,
+        ...(D.datasets.bcp100 ? [`<b>The BrowseComp-Plus corpus is reduced and the question count is small.</b> The corpus is the union of candidate documents of the 100 sampled questions (about 8k documents), not the full 100k, so recall and accuracy are optimistic. Of the 80 test questions, those blocked by the content filter (${D.datasets.bcp100.settings.full.failed_questions.length} on the full corpus, ${D.datasets.bcp100.settings.pool.failed_questions.length} on the pool) are excluded from every group, leaving ${D.datasets.bcp100.settings.full.questions}; confidence intervals are wide, and dev has only ${D.datasets.bcp100.frozen.n_questions} questions, so the tuning of τ is unstable.`, `<b>G8 was only run on the BrowseComp-Plus pool, and its latency is underestimated.</b> Offline simulation on RAGBench showed that Jev re-ranking does not help, so G8 was not run there. On BrowseComp-Plus the round-1 Jev scores were already cached from G5, so the latency column is not comparable with other groups; cost is computed from token counts and is unaffected.`, `<b>BrowseComp-Plus accuracy is judged by an LLM.</b> The judge compares the model answer with the reference answer; the official Qwen3-32B judge was not used, so absolute values cannot be compared with the official leaderboard.`] : []),
+        `<b>Two data fixes were applied.</b> techqa lists every question twice in RAGBench, which made dev and test overlap; it was de-duplicated and rerun. GLM uses reasoning_effort = low (this model cannot disable thinking).`
+  ];
+  $('limits-list').innerHTML = items.map((t) => `<li>${t}</li>`).join('');
+    $('foot').textContent = `Source: this project's runs/final_* results and API cache. GLM-5.3-Flash (z.ai) generates, Jev (jev-1.13.0) judges and does per-chunk retrieval, text-embedding-3-small embeds, and mimo-v2.6-pro grades.`;
+}
+
+/* BrowseComp-Plus: accuracy comes from the judge comparing the answer with the gold answer. Wording is data-driven. */
+function BCP_FINDINGS() {
+  const b = 'bcp100'; if (!D.datasets[b]) return [];
+  const g = (set, x) => get(b, set, x);
+  const cm = (set, x, y) => { const c = contrast(b, set, x, y); return c && c.metrics.correct ? c.metrics.correct : null; };
+  // difference of accuracy as "x minus y", with 95% CI and the exact McNemar p-value
+  const pEq = (p) => p < 0.001 ? 'p < 0.001' : 'p = ' + p.toFixed(3);
+    const dxy = (set, x, y) => { const m = cm(set, x, y); return m ? `${sgn(m.diff.mean_diff, 2)} (95% CI ${sgn(m.diff.lo, 2)} to ${sgn(m.diff.hi, 2)}; McNemar ${pEq(m.mcnemar.p_value)})` : '–'; };
+  // contrasts are stored as (a, b) = (single-round, multi-round) etc.; flip when the finding reads the other way round
+    const dyx = (set, x, y) => { const m = cm(set, x, y); return m ? `${sgn(-m.diff.mean_diff, 2)} (95% CI ${sgn(-m.diff.hi, 2)} to ${sgn(-m.diff.lo, 2)}; McNemar ${pEq(m.mcnemar.p_value)})` : '–'; };
+  const q = D.datasets[b].settings.full.questions;
+  const acc = (set, x) => pct(g(set, x).accuracy);
+  const ratio = (set, x, y, f) => g(set, x)[f] / g(set, y)[f];
+  const cost5 = g('pool', 'G5'), cost4 = g('pool', 'G4');
+  return [
+        { h: `BrowseComp-Plus (${q} questions): the largest multi-round gap`,
+            p: `Single-round (G1) almost never answers correctly, while multi-round search reaches clearly higher accuracy: full corpus G1 ${acc('full','G1')}, G3 ${acc('full','G3')} (G3 − G1 = ${dyx('full','G1','G3')}); candidate pool G1 ${acc('pool','G1')}, G3 ${acc('pool','G3')} (G3 − G1 = ${dyx('pool','G1','G3')}). These questions need repeated searches to find the clues; single-round gold-document recall on the first retrieval is only ${pct(g('full','G1').recall_first5)}.`,
+            ev: `On RAGBench multi-round improves completeness by at most 0.08; here the accuracy gap is 0.35–0.55.` },
+        { h: 'Jev per-chunk retrieval clearly beats embedding, at a much higher cost',
+            p: `Within the candidate pool, G5 (Jev retrieval) reaches ${acc('pool','G5')} accuracy against ${acc('pool','G4')} for G4 (embedding) (G4 − G5 = ${dxy('pool','G4','G5')}). Round-1 recall@5 is ${pct(cost5.recall_first5)} vs ${pct(cost4.recall_first5)}; G5 needs only ${cost5.mean_rounds.toFixed(1)} rounds on average against ${cost4.mean_rounds.toFixed(1)} for G4. This is the opposite of RAGBench, where the two are on par. The pool is made of each question's gold, evidence and hard-negative documents; G4 and G5 are compared within the same pool, but it always contains the answer documents, so it is easier than the full corpus.`,
+            ev: `Cost: ${fmtK(k1(cost5.cost._total))}/1k questions vs ${fmtK(k1(cost4.cost._total))}/1k (about ${(cost5.cost._total / cost4.cost._total).toFixed(0)}x); per correct answer ${usd(cost5.cost_per_correct, 3)} vs ${usd(cost4.cost_per_correct, 3)}; p50 latency ${cost5.latency_p50_s.toFixed(0)} s vs ${cost4.latency_p50_s.toFixed(0)} s. G5 scores about 1,400 chunks per question one by one, so it only runs on the candidate pool: over the whole reduced corpus (145k chunks) a round would take about 1 hour and $8, and over the full 1.7M chunks about 12 hours and $70–100.` },
+        { h: 'Jev as a re-ranker: most of the benefit at about one sixth of the cost',
+            p: `G8 (embedding top 200, re-ranked by Jev) reaches ${acc('pool','G8')} accuracy, between G4 (${acc('pool','G4')}) and G5 (${acc('pool','G5')}): G4 − G8 = ${dxy('pool','G4','G8')}; G8 − G5 = ${dxy('pool','G8','G5')}. The gap to G5 is not significant at ${D.datasets[b].settings.pool.questions} questions, but that does not mean there is no difference. Round-1 recall@5 is ${pct(g('pool','G8').recall_first5)} (G5 ${pct(g('pool','G5').recall_first5)}, G4 ${pct(g('pool','G4').recall_first5)}), with ${g('pool','G8').mean_rounds.toFixed(1)} rounds on average.`,
+            ev: `Cost ${fmtK(k1(g('pool','G8').cost._total))}/1k questions, 1/${(g('pool','G5').cost._total / g('pool','G8').cost._total).toFixed(0)} of G5; per correct answer ${usd(g('pool','G8').cost_per_correct, 3)} (G5 ${usd(g('pool','G5').cost_per_correct, 3)}, G3 ${usd(g('pool','G3').cost_per_correct, 3)}). Latency is underestimated: round-1 Jev scores were already cached when G5 ran.` },
+        { h: 'The stop rule barely affects accuracy',
+            p: `On the full corpus G3 (LLM judge) ${acc('full','G3')}, G4 (Jev judge) ${acc('full','G4')}, G6 (fixed 6 rounds) ${acc('full','G6')} and G7 (oracle) ${acc('full','G7')} do not differ significantly (G3 − G4 = ${dxy('full','G3','G4')}). In the candidate pool G3 is slightly above G4 (G3 − G4 = ${dxy('pool','G3','G4')}), borderline significant and inconsistent with the full corpus.`,
+            ev: `Cost: Jev judge ${fmtK(k1(g('full','G4').cost._total))}/1k questions vs LLM judge ${fmtK(k1(g('full','G3').cost._total))}/1k (full corpus; Jev is about ${Math.round((1 - g('full','G4').cost._total / g('full','G3').cost._total) * 100)}% lower). Dev has only ${D.datasets[b].frozen.n_questions} questions, so the tuning of τ and R_fixed (${D.datasets[b].frozen.r_fixed}, i.e. always run to the cap) is unstable.` },
+        { h: 'ReAct is slightly worse than separated multi-round',
+            p: `ReAct (G2) scores ${acc('full','G2')} on the full corpus and ${acc('pool','G2')} on the pool, both below G3 (${acc('full','G3')}, ${acc('pool','G3')}); G2 − G3: full corpus ${dxy('full','G2','G3')}; pool ${dxy('pool','G2','G3')}. It is cheaper per correct answer: ${usd(g('full','G2').cost_per_correct, 3)} vs ${usd(g('full','G3').cost_per_correct, 3)}.`,
+            ev: `Borderline significant, and G2 has no evidence cap, so this is not a clean single-variable comparison.` }
+  ];
+}
+
+function renderAll() { renderControls(); renderNote(); renderScatter(); renderTable(); renderCostBars(); renderForest(); }
+renderMeta(); renderFindings(); renderCost(); renderJudges(); renderLimits(); renderAll();
+</script>

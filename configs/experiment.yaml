@@ -1,0 +1,60 @@
+# RAG search-flow comparison, spec v0.1. Anything marked TBD must be filled before the pilot.
+# API keys are read from environment variables only (never put them in this file):
+#   OPENAI_API_KEY (embeddings), GLM_API_KEY, TYPESAFE_API_KEY, and JUDGE key via judge.api_key_env.
+
+chunk: {size: 512, overlap: 64, encoding: cl100k_base}
+
+embed:
+  model: text-embedding-3-small
+  batch_size: 128
+  max_batch_tokens: 16000
+  tokens_per_min: 40000   # OpenAI account TPM limit for embeddings (observed 2026-10-02); raise after a tier upgrade
+  workers: 4
+
+index:                    # exact search; mode=auto streams from disk when the index will not fit in free RAM
+  mode: auto              # auto | memory | stream
+  memory_fraction: 0.5
+  block_rows: 20000       # stream: ~123 MB per thread at dim 1536
+  threads: 4
+  max_batch: 64           # concurrent queries merged into one scan
+  max_wait_ms: 10
+
+glm:                      # one provider, fixed for the whole experiment
+  provider: z.ai          # TBD (e.g. the provider name; recorded in every JSONL row)
+  base_url: https://api.z.ai/api/paas/v4/chat/completions          # TBD
+  model: glm-5.3-flash             # TBD (GLM 5.3 Flash, exact id as the provider names it)
+  api_key_env: GLM_API_KEY
+  temperature: 0.0        # freeze after pilot
+  max_tokens: null        # freeze after pilot
+  extra_body: {reasoning_effort: low}   # FROZEN: glm-5.3-flash cannot disable thinking; effort=low cut reasoning ~20x, latency ~4x (pilot, 2026-10-02)
+
+judge:                    # one model for all groups: BrowseComp-Plus correctness; RAGBench faithfulness/completeness. TBD
+  provider: xiaomi
+  base_url: https://api.xiaomimimo.com/v1
+  model: mimo-v2.6-pro
+  api_key_env: JUDGE_API_KEY
+  temperature: 0.0
+  requests_per_min: 48    # mimo limit is 100 RPM / 10M TPM; two grading processes may run at once
+
+jev:
+  model: jev-1.13.0       # pinned, not jev-latest
+  req_per_s: 40
+  tokens_per_s: 100000
+  workers: 16
+
+search: {top_k: 5, e_max: 8000, r_max: 6}   # r_max frozen after dev
+
+pricing:                  # USD per 1M tokens
+  jev_input: 0.042
+  jev_output: 0.0
+  embed_input: 0.02       # verify against current OpenAI price list
+  glm_input: 0.15         # TBD per provider
+  glm_output: 0.5        # applies to output + reasoning tokens
+
+seed: 20261002
+dev_fraction: 0.2
+test_fraction: 0.165     # BUDGET: seeded nested subsample of each RAGBench test split (400 -> 66); bcp100 overridden below
+test_fraction_by_dataset: {bcp100: 1.0}   # BrowseComp-Plus keeps all 80 test questions (too few to subsample)
+repeats: 3
+work_dir: work
+runs_dir: runs

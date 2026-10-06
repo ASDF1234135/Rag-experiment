@@ -1,0 +1,48 @@
+# Secrets: never commit real keys (.env.example is the template)
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Large or regenerable experiment artifacts
+# raw/: downloaded RAGBench / BrowseComp-Plus files, embedding model, prebuilt indexes
+raw/
+# data/: converted datasets (python -m ragexp.cli convert-*)
+data/
+# work/: chunk DBs, embedding shards, API cache, logs (resumable state)
+work/
+
+# Run outputs: keep only the aggregated summaries, drop per-call records and trajectories
+runs/*/*
+!runs/*/summary.md
+!runs/*/summary.json
+
+# Large binary / model formats
+*.safetensors
+*.parquet
+*.pkl
+*.npy
+*.sqlite
+*.sqlite-journal
+
+# Logs and scratch
+*.log
+*.err
+*.out
+*.bak
+
+# Editors / OS / tooling
+.idea/
+.vscode/
+.claude/
+.DS_Store
+Thumbs.db

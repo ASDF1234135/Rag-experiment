@@ -1,0 +1,460 @@
+{
+  "summary": [
+    {
+      "group": "G1",
+      "n": 195,
+      "accuracy": null,
+      "faithfulness": 0.9625641025641026,
+      "fully_faithful": 0.8923076923076924,
+      "abstain_rate": 0.0,
+      "completeness": 0.589059829059829,
+      "mean_rounds": 1.0,
+      "r_max_truncated": 0.0,
+      "premature_stop": 0.0,
+      "excess_rounds_vs_G7": null,
+      "covered_all_final": 0.676923076923077,
+      "recall_first@5": 0.8474358974358974,
+      "recall_final": 0.8474358974358974,
+      "mrr_first": 0.9564102564102565,
+      "ndcg10_first": 0.8615493684756742,
+      "cost_usd_per_q": 0.00014922302564102563,
+      "cost_usd_per_correct": null,
+      "cost_usd_per_faithful": 0.00016661775862068966,
+      "latency_p50_ms": 2930.0308999954723,
+      "latency_p95_ms": 5804.717790026913,
+      "retries_per_q": 0.08205128205128205,
+      "tokens": {
+        "embed_query.in": 20.753846153846105,
+        "embed_query.out": 0.0,
+        "retrieve.in": 0.0,
+        "retrieve.out": 0.0,
+        "glm_answer.in": 729.5230769230775,
+        "glm_answer.out": 78.75897435897434
+      }
+    },
+    {
+      "group": "G2",
+      "n": 195,
+      "accuracy": null,
+      "faithfulness": 0.878763640873016,
+      "fully_faithful": 0.6875,
+      "abstain_rate": 0.015384615384615385,
+      "completeness": 0.7174786324786325,
+      "mean_rounds": 2.348717948717949,
+      "r_max_truncated": 0.015384615384615385,
+      "premature_stop": 0.0,
+      "excess_rounds_vs_G7": null,
+      "covered_all_final": 0.8102564102564103,
+      "recall_first@5": 0.6709401709401709,
+      "recall_final": 0.9102564102564102,
+      "mrr_first": 0.9479202279202279,
+      "ndcg10_first": 0.742722523698819,
+      "cost_usd_per_q": 0.00040753364102564106,
+      "cost_usd_per_correct": null,
+      "cost_usd_per_faithful": 0.0006372688636363636,
+      "latency_p50_ms": 10721.744899929035,
+      "latency_p95_ms": 25734.96142004732,
+      "retries_per_q": 0.0,
+      "tokens": {
+        "glm_react_step.in": 2243.7641025641014,
+        "glm_react_step.out": 141.3538461538461,
+        "embed_query.in": 14.605128205128173,
+        "embed_query.out": 0.0,
+        "retrieve.in": 0.0,
+        "retrieve.out": 0.0
+      }
+    },
+    {
+      "group": "G3",
+      "n": 195,
+      "accuracy": null,
+      "faithfulness": 0.9643589743589744,
+      "fully_faithful": 0.8923076923076924,
+      "abstain_rate": 0.0,
+      "completeness": 0.6691880341880342,
+      "mean_rounds": 1.7128205128205127,
+      "r_max_truncated": 0.07692307692307693,
+      "premature_stop": 0.07692307692307693,
+      "excess_rounds_vs_G7": 0.15897435897435896,
+      "covered_all_final": 0.8871794871794871,
+      "recall_first@5": 0.8474358974358974,
+      "recall_final": 0.9461538461538461,
+      "mrr_first": 0.9564102564102565,
+      "ndcg10_first": 0.8615493684756742,
+      "cost_usd_per_q": 0.0005738399999999999,
+      "cost_usd_per_correct": null,
+      "cost_usd_per_faithful": 0.0006537586206896552,
+      "latency_p50_ms": 5554.145399946719,
+      "latency_p95_ms": 27366.96328005636,
+      "retries_per_q": 0.26153846153846155,
+      "tokens": {
+        "embed_query.in": 30.641025641025582,
+        "embed_query.out": 0.0,
+        "retrieve.in": 0.0,
+        "retrieve.out": 0.0,
+        "glm_judge.in": 1688.3948717948708,
+        "glm_judge.out": 37.08205128205124,
+        "glm_answer.in": 948.4871794871798,
+        "glm_answer.out": 75.5846153846154,
+        "glm_query_gen.in": 765.6923076923072,
+        "glm_query_gen.out": 13.015384615384606
+      }
+    },
+    {
+      "group": "G4",
+      "n": 195,
+      "accuracy": null,
+      "faithfulness": 0.97421875,
+      "fully_faithful": 0.921875,
+      "abstain_rate": 0.015384615384615385,
+      "completeness": 0.6635470085470085,
+      "mean_rounds": 1.958974358974359,
+      "r_max_truncated": 0.14358974358974358,
+      "premature_stop": 0.09230769230769231,
+      "excess_rounds_vs_G7": 0.40512820512820513,
+      "covered_all_final": 0.8769230769230769,
+      "recall_first@5": 0.8474358974358974,
+      "recall_final": 0.941025641025641,
+      "mrr_first": 0.9564102564102565,
+      "ndcg10_first": 0.8615493684756742,
+      "cost_usd_per_q": 0.00048765173333333326,
+      "cost_usd_per_correct": null,
+      "cost_usd_per_faithful": 0.0005452509152542373,
+      "latency_p50_ms": 3758.449799963273,
+      "latency_p95_ms": 21166.78288003313,
+      "retries_per_q": 0.2205128205128205,
+      "tokens": {
+        "embed_query.in": 34.528205128205094,
+        "embed_query.out": 0.0,
+        "retrieve.in": 0.0,
+        "retrieve.out": 0.0,
+        "jev_judge.in": 3005.430769230767,
+        "jev_judge.out": 50.93333333333322,
+        "glm_answer.in": 995.569230769231,
+        "glm_answer.out": 75.45641025641028,
+        "glm_query_gen.in": 1101.9333333333334,
+        "glm_query_gen.out": 16.75897435897435
+      }
+    },
+    {
+      "group": "G6",
+      "n": 195,
+      "accuracy": null,
+      "faithfulness": 0.9684615384615385,
+      "fully_faithful": 0.9076923076923077,
+      "abstain_rate": 0.0,
+      "completeness": 0.5877777777777777,
+      "mean_rounds": 1.0,
+      "r_max_truncated": 0.0,
+      "premature_stop": 0.0,
+      "excess_rounds_vs_G7": -0.5538461538461539,
+      "covered_all_final": 0.676923076923077,
+      "recall_first@5": 0.8474358974358974,
+      "recall_final": 0.8474358974358974,
+      "mrr_first": 0.9564102564102565,
+      "ndcg10_first": 0.8615493684756742,
+      "cost_usd_per_q": 0.00014922302564102563,
+      "cost_usd_per_correct": null,
+      "cost_usd_per_faithful": 0.00016379372881355933,
+      "latency_p50_ms": 2957.643600006122,
+      "latency_p95_ms": 5747.202279971676,
+      "retries_per_q": 0.08205128205128205,
+      "tokens": {
+        "embed_query.in": 20.753846153846105,
+        "embed_query.out": 0.0,
+        "retrieve.in": 0.0,
+        "retrieve.out": 0.0,
+        "glm_answer.in": 729.5230769230775,
+        "glm_answer.out": 78.75897435897434
+      }
+    },
+    {
+      "group": "G7",
+      "n": 195,
+      "accuracy": null,
+      "faithfulness": 0.9675641025641025,
+      "fully_faithful": 0.9230769230769231,
+      "abstain_rate": 0.0,
+      "completeness": 0.6955982905982905,
+      "mean_rounds": 1.5538461538461539,
+      "r_max_truncated": 0.05128205128205128,
+      "premature_stop": 0.0,
+      "excess_rounds_vs_G7": null,
+      "covered_all_final": 0.9487179487179487,
+      "recall_first@5": 0.8474358974358974,
+      "recall_final": 0.9752136752136752,
+      "mrr_first": 0.9564102564102565,
+      "ndcg10_first": 0.8615493684756742,
+      "cost_usd_per_q": 0.00027071241025641027,
+      "cost_usd_per_correct": null,
+      "cost_usd_per_faithful": 0.0003067153333333333,
+      "latency_p50_ms": 3736.743200046476,
+      "latency_p95_ms": 11059.229800052653,
+      "retries_per_q": 0.09230769230769231,
+      "tokens": {
+        "embed_query.in": 27.85128205128198,
+        "embed_query.out": 0.0,
+        "retrieve.in": 0.0,
+        "retrieve.out": 0.0,
+        "glm_answer.in": 928.7846153846157,
+        "glm_answer.out": 76.81025641025644,
+        "glm_query_gen.in": 582.1999999999996,
+        "glm_query_gen.out": 10.2051282051282
+      }
+    }
+  ],
+  "contrasts": [
+    {
+      "a": "G3",
+      "b": "G4",
+      "what": "judge: LLM vs Jev",
+      "n": 65,
+      "metrics": {
+        "fully_faithful": {
+          "n": 64,
+          "diff": {
+            "mean_diff": -0.015625,
+            "lo": -0.078125,
+            "hi": 0.046875
+          },
+          "mcnemar": {
+            "a_only": 2,
+            "b_only": 3,
+            "p_value": 1.0
+          }
+        },
+        "faithfulness": {
+          "n": 64,
+          "diff": {
+            "mean_diff": -0.006510416666666666,
+            "lo": -0.02578125,
+            "hi": 0.010416666666666666
+          }
+        },
+        "completeness": {
+          "n": 65,
+          "diff": {
+            "mean_diff": 0.0056410256410256415,
+            "lo": -0.01871794871794872,
+            "hi": 0.029487179487179493
+          }
+        }
+      },
+      "cost_diff_usd": {
+        "mean_diff": 8.618826666666666e-05,
+        "lo": -1.515231666666668e-05,
+        "hi": 0.00017859816589743582
+      }
+    },
+    {
+      "a": "G2",
+      "b": "G3",
+      "what": "ReAct vs separated judge/action",
+      "n": 65,
+      "metrics": {
+        "fully_faithful": {
+          "n": 64,
+          "diff": {
+            "mean_diff": -0.203125,
+            "lo": -0.3125,
+            "hi": -0.09375
+          },
+          "mcnemar": {
+            "a_only": 1,
+            "b_only": 14,
+            "p_value": 0.0009765625
+          }
+        },
+        "faithfulness": {
+          "n": 64,
+          "diff": {
+            "mean_diff": -0.08503844246031746,
+            "lo": -0.13329768105158732,
+            "hi": -0.04298084077380953
+          }
+        },
+        "completeness": {
+          "n": 65,
+          "diff": {
+            "mean_diff": 0.0482905982905983,
+            "lo": -0.007264957264957262,
+            "hi": 0.10085470085470086
+          }
+        }
+      },
+      "cost_diff_usd": {
+        "mean_diff": -0.00016630635897435896,
+        "lo": -0.0002910507974358974,
+        "hi": -6.138786025641026e-05
+      }
+    },
+    {
+      "a": "G1",
+      "b": "G2",
+      "what": "single round vs ReAct",
+      "n": 65,
+      "metrics": {
+        "fully_faithful": {
+          "n": 64,
+          "diff": {
+            "mean_diff": 0.203125,
+            "lo": 0.09375,
+            "hi": 0.3125
+          },
+          "mcnemar": {
+            "a_only": 14,
+            "b_only": 1,
+            "p_value": 0.0009765625
+          }
+        },
+        "faithfulness": {
+          "n": 64,
+          "diff": {
+            "mean_diff": 0.0832155257936508,
+            "lo": 0.03846540178571428,
+            "hi": 0.13498294890873017
+          }
+        },
+        "completeness": {
+          "n": 65,
+          "diff": {
+            "mean_diff": -0.12841880341880343,
+            "lo": -0.19979166666666667,
+            "hi": -0.057051282051282064
+          }
+        }
+      },
+      "cost_diff_usd": {
+        "mean_diff": -0.0002583106153846154,
+        "lo": -0.0003350790846153846,
+        "hi": -0.0001960441653846154
+      }
+    },
+    {
+      "a": "G1",
+      "b": "G3",
+      "what": "single round vs multi-round",
+      "n": 65,
+      "metrics": {
+        "fully_faithful": {
+          "n": 65,
+          "diff": {
+            "mean_diff": 0.0,
+            "lo": -0.07692307692307693,
+            "hi": 0.07692307692307693
+          },
+          "mcnemar": {
+            "a_only": 3,
+            "b_only": 3,
+            "p_value": 1.0
+          }
+        },
+        "faithfulness": {
+          "n": 65,
+          "diff": {
+            "mean_diff": -0.0017948717948717953,
+            "lo": -0.02153846153846154,
+            "hi": 0.016923076923076926
+          }
+        },
+        "completeness": {
+          "n": 65,
+          "diff": {
+            "mean_diff": -0.08012820512820512,
+            "lo": -0.1326923076923077,
+            "hi": -0.032692307692307694
+          }
+        }
+      },
+      "cost_diff_usd": {
+        "mean_diff": -0.0004246169743589743,
+        "lo": -0.0005864960397435896,
+        "hi": -0.0002897591269230769
+      }
+    },
+    {
+      "a": "G4",
+      "b": "G6",
+      "what": "Jev stop vs fixed rounds",
+      "n": 65,
+      "metrics": {
+        "fully_faithful": {
+          "n": 64,
+          "diff": {
+            "mean_diff": 0.015625,
+            "lo": -0.03125,
+            "hi": 0.0625
+          },
+          "mcnemar": {
+            "a_only": 2,
+            "b_only": 1,
+            "p_value": 1.0
+          }
+        },
+        "faithfulness": {
+          "n": 64,
+          "diff": {
+            "mean_diff": 0.00625,
+            "lo": -0.007812500000000002,
+            "hi": 0.023697916666666666
+          }
+        },
+        "completeness": {
+          "n": 65,
+          "diff": {
+            "mean_diff": 0.07576923076923077,
+            "lo": 0.024993589743589752,
+            "hi": 0.12847115384615374
+          }
+        }
+      },
+      "cost_diff_usd": {
+        "mean_diff": 0.0003384287076923077,
+        "lo": 0.000217484488974359,
+        "hi": 0.000478529912051282
+      }
+    },
+    {
+      "a": "G4",
+      "b": "G7",
+      "what": "Jev stop vs oracle stop",
+      "n": 65,
+      "metrics": {
+        "fully_faithful": {
+          "n": 64,
+          "diff": {
+            "mean_diff": 0.0,
+            "lo": -0.0625,
+            "hi": 0.0625
+          },
+          "mcnemar": {
+            "a_only": 2,
+            "b_only": 2,
+            "p_value": 1.0
+          }
+        },
+        "faithfulness": {
+          "n": 64,
+          "diff": {
+            "mean_diff": 0.007161458333333334,
+            "lo": -0.011067708333333334,
+            "hi": 0.029296875
+          }
+        },
+        "completeness": {
+          "n": 65,
+          "diff": {
+            "mean_diff": -0.03205128205128205,
+            "lo": -0.0641025641025641,
+            "hi": -0.005128205128205128
+          }
+        }
+      },
+      "cost_diff_usd": {
+        "mean_diff": 0.00021693932307692305,
+        "lo": 9.989325256410258e-05,
+        "hi": 0.0003469149712820513
+      }
+    }
+  ]
+}

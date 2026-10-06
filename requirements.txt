@@ -1,0 +1,14 @@
+numpy
+scipy
+scikit-learn
+pandas
+pyarrow
+pydantic>=2
+pyyaml
+httpx
+openai>=1.40
+tiktoken
+faiss-cpu      # exact IndexFlatIP; a numpy fallback is used if missing
+datasets       # only for downloading BrowseComp-Plus / RAGBench
+pytest
+psutil
